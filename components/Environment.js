@@ -1,4 +1,3 @@
-// components/Environment.js
 import React from "react";
 
 const Environment = () => {

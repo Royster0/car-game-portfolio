@@ -1,8 +1,7 @@
-// components/Car.js
-import React, { useRef, useEffect, useState, forwardRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import gsap from "gsap";
 import { useRouter } from "next/router";
+import { forwardRef, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const Car = forwardRef((props, ref) => {

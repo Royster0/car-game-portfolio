@@ -1,4 +1,3 @@
-// components/ControlsOverlay.js
 import React from "react";
 
 const ControlsOverlay = () => {

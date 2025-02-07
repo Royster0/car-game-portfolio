@@ -1,4 +1,3 @@
-// components/Signs.js
 import React from "react";
 import { Text } from "@react-three/drei";
 
