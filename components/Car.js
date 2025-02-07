@@ -1,7 +1,7 @@
+import React, { useRef, useEffect, useState, forwardRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import gsap from "gsap";
 import { useRouter } from "next/router";
-import { forwardRef, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 const Car = forwardRef((props, ref) => {
@@ -10,19 +10,38 @@ const Car = forwardRef((props, ref) => {
   const carRef = ref || internalRef;
   const router = useRouter();
   const [keys, setKeys] = useState({});
-
-  // Velocity vector stored as a ref so it persists between frames.
   const velocityRef = useRef(new THREE.Vector3(0, 0, 0));
+  const collisionTriggered = useRef(false);
 
   // --- Physics constants ---
-  const ACCELERATION = 0.005; // How quickly the car speeds up when accelerating.
-  const MAX_SPEED = 0.5; // Maximum forward speed.
-  const MAX_REVERSE_SPEED = 0.3; // Maximum reverse speed.
-  const COAST_DECELERATION = 0.98; // Natural friction when not accelerating.
-  const BRAKE_DECELERATION = 0.8; // Extra deceleration when braking (spacebar).
-  const TURN_RATE = 0.03; // Rotation speed (radians per frame).
-  const DRIFT_LERP_TURNING = 0.02; // Lerp factor for aligning velocity when turning.
-  const DRIFT_LERP_STRAIGHT = 0.1; // Lerp factor when going straight (faster alignment).
+  const ACCELERATION = 0.005; // Acceleration per frame
+  const MAX_SPEED = 0.5; // Maximum forward speed
+  const MAX_REVERSE_SPEED = 0.3; // Maximum reverse speed
+  const COAST_DECELERATION = 0.98; // Friction when not accelerating
+  const BRAKE_DECELERATION = 0.8; // Extra deceleration when braking
+  const TURN_RATE = 0.03; // Rotation speed (radians per frame)
+  const DRIFT_LERP_TURNING = 0.02; // Lerp factor when turning (for drift)
+  const DRIFT_LERP_STRAIGHT = 0.1; // Lerp factor when going straight
+
+  // --- Sign definitions ---
+  // Make sure these positions match those in your Signs component.
+  const signPositions = [
+    {
+      title: "Experience",
+      position: new THREE.Vector3(5, 0.5, -5),
+      redirect: "/experience",
+    },
+    {
+      title: "Projects",
+      position: new THREE.Vector3(-5, 0.5, -5),
+      redirect: "/projects",
+    },
+    {
+      title: "Contact",
+      position: new THREE.Vector3(0, 0.5, 5),
+      redirect: "/contact",
+    },
+  ];
 
   // Set up keyboard event listeners.
   useEffect(() => {
@@ -51,17 +70,16 @@ const Car = forwardRef((props, ref) => {
     }
   }, [carRef]);
 
-  // Update car movement and physics every frame.
+  // Update car movement, physics, and collision detection every frame.
   useFrame(() => {
     if (!carRef.current) return;
     const car = carRef.current;
 
-    // Determine the car's forward direction (assuming it faces -Z initially).
+    // Determine the car's forward direction (initially facing -Z).
     const forward = new THREE.Vector3(0, 0, -1);
     forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
 
-    // Handle turning (rotation) using A (left) and D (right).
-    // Also set a flag to indicate if the car is turning (for drift effect).
+    // --- Handle turning ---
     let isTurning = false;
     if (keys["a"]) {
       car.rotation.y += TURN_RATE;
@@ -72,7 +90,7 @@ const Car = forwardRef((props, ref) => {
       isTurning = true;
     }
 
-    // Handle acceleration and reverse.
+    // --- Handle acceleration and reverse ---
     if (keys["w"]) {
       // Accelerate forward.
       velocityRef.current.add(forward.clone().multiplyScalar(ACCELERATION));
@@ -86,21 +104,20 @@ const Car = forwardRef((props, ref) => {
         velocityRef.current.setLength(MAX_REVERSE_SPEED);
       }
     } else {
-      // Apply natural friction when no acceleration input is provided.
+      // Apply natural friction when not accelerating.
       velocityRef.current.multiplyScalar(COAST_DECELERATION);
     }
 
-    // Apply braking if spacebar is pressed.
+    // --- Handle braking ---
     if (keys[" "]) {
       velocityRef.current.multiplyScalar(BRAKE_DECELERATION);
     }
 
     // --- Drift effect ---
-    // The desired velocity is the current speed in the direction the car is facing.
+    // Desired velocity is the current speed in the direction the car is facing.
     const desiredVelocity = forward
       .clone()
       .setLength(velocityRef.current.length());
-    // Use a lower lerp factor when turning to simulate drift (slower alignment).
     const driftLerpFactor = isTurning
       ? DRIFT_LERP_TURNING
       : DRIFT_LERP_STRAIGHT;
@@ -109,7 +126,19 @@ const Car = forwardRef((props, ref) => {
     // Update the car's position based on its velocity.
     car.position.add(velocityRef.current);
 
-    // (Optional) Collision detection with signs can be added here.
+    // --- Sign collision detection ---
+    // Only trigger one redirect per collision.
+    if (!collisionTriggered.current) {
+      const collisionThreshold = 1; // Adjust as needed
+      for (let sign of signPositions) {
+        const distance = car.position.distanceTo(sign.position);
+        if (distance < collisionThreshold) {
+          collisionTriggered.current = true;
+          router.push(sign.redirect);
+          break;
+        }
+      }
+    }
   });
 
   return (

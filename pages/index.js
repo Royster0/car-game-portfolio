@@ -1,3 +1,4 @@
+// pages/index.js
 import React, { Suspense, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Car from "../components/Car";
@@ -10,24 +11,22 @@ import Course from "../components/Course";
 export default function Home() {
   const carRef = useRef();
 
-  // State to track the course timer and status.
+  // State to track course status and timer.
   const [courseStarted, setCourseStarted] = useState(false);
   const [courseFinished, setCourseFinished] = useState(false);
   const [courseElapsedTime, setCourseElapsedTime] = useState(0);
 
-  // Callback when the course starts.
+  // Callbacks for the course events.
   const handleCourseStart = (startTime) => {
     setCourseStarted(true);
     setCourseFinished(false);
     setCourseElapsedTime(0);
   };
 
-  // Callback to update the elapsed time.
   const handleCourseUpdate = (time) => {
     setCourseElapsedTime(time);
   };
 
-  // Callback when the course finishes.
   const handleCourseFinish = () => {
     setCourseFinished(true);
   };
@@ -41,7 +40,7 @@ export default function Home() {
         <Suspense fallback={null}>
           <Environment />
           <Car ref={carRef} />
-          <Signs />
+          <Signs /> {/* Sign collisions (redirects) still work as before */}
           <Course
             carRef={carRef}
             onStart={handleCourseStart}

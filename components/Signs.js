@@ -2,9 +2,9 @@ import React from "react";
 import { Text } from "@react-three/drei";
 
 const signs = [
-  { title: "Experience", position: [5, 0.5, -5], redirect: "/experience" },
-  { title: "Projects", position: [-5, 0.5, -5], redirect: "/projects" },
-  { title: "Contact", position: [0, 0.5, 5], redirect: "/contact" },
+  { title: "Experience", position: [5, 0.5, -5] },
+  { title: "Projects", position: [-5, 0.5, -5] },
+  { title: "Contact", position: [0, 0.5, 5] },
 ];
 
 const Signs = () => {

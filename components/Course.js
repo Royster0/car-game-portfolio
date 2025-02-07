@@ -3,12 +3,12 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
 const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
-  // Define the start and finish zones.
-  const startZonePosition = new THREE.Vector3(5, 0.01, 5);
-  const finishZonePosition = new THREE.Vector3(-5, 0.01, -5);
+  // Place the course in a distinct area (e.g., top-right quadrant).
+  const startZonePosition = new THREE.Vector3(8, 0.01, 8);
+  const finishZonePosition = new THREE.Vector3(8, 0.01, 12);
   const zoneSize = { width: 4, depth: 4 };
 
-  // Local flags so we only trigger start/finish once.
+  // Local flags to ensure each event fires only once.
   const [courseStarted, setCourseStarted] = useState(false);
   const [courseFinished, setCourseFinished] = useState(false);
   const [localStartTime, setLocalStartTime] = useState(null);
@@ -17,7 +17,7 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
     if (!carRef.current) return;
     const carPos = carRef.current.position;
 
-    // Check if the car has entered the start zone.
+    // Check for entry into the start zone.
     if (!courseStarted) {
       if (
         Math.abs(carPos.x - startZonePosition.x) < zoneSize.width / 2 &&
@@ -30,12 +30,12 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
       }
     }
 
-    // Once started (and not finished), update the elapsed time.
+    // Once started (and not finished), update the timer.
     if (courseStarted && !courseFinished && localStartTime) {
       const currentTime = performance.now();
-      onUpdate((currentTime - localStartTime) / 1000); // Elapsed time in seconds.
+      onUpdate((currentTime - localStartTime) / 1000); // Timer in seconds.
 
-      // Check if the car has reached the finish zone.
+      // Check for entry into the finish zone.
       if (
         Math.abs(carPos.x - finishZonePosition.x) < zoneSize.width / 2 &&
         Math.abs(carPos.z - finishZonePosition.z) < zoneSize.depth / 2
@@ -48,7 +48,7 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
 
   return (
     <>
-      {/* Start Zone (green translucent plane) */}
+      {/* Start Zone (displayed as a semi-transparent green plane) */}
       <mesh
         position={[startZonePosition.x, 0.05, startZonePosition.z]}
         rotation={[-Math.PI / 2, 0, 0]}
@@ -56,7 +56,7 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
         <planeGeometry args={[zoneSize.width, zoneSize.depth]} />
         <meshBasicMaterial color="green" opacity={0.5} transparent />
       </mesh>
-      {/* Finish Zone (red translucent plane) */}
+      {/* Finish Zone (displayed as a semi-transparent red plane) */}
       <mesh
         position={[finishZonePosition.x, 0.05, finishZonePosition.z]}
         rotation={[-Math.PI / 2, 0, 0]}
