@@ -7,6 +7,7 @@ import Signs from "../components/Signs";
 import FollowCamera from "../components/FollowCamera";
 import ControlsOverlay from "../components/ControlsOverlay";
 import Course from "../components/Course";
+import Props from "../components/Props"; // Import the new Props component
 
 export default function Home() {
   const carRef = useRef();
@@ -39,6 +40,7 @@ export default function Home() {
         <directionalLight position={[10, 10, 5]} intensity={1} />
         <Suspense fallback={null}>
           <Environment />
+          <Props /> {/* Render fun props: trees, boxes, road */}
           <Car ref={carRef} />
           <Signs /> {/* Sign collisions (redirects) still work as before */}
           <Course
