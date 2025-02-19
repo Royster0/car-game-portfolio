@@ -1,8 +1,3 @@
-// components/Props.js
-import React from "react";
-import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
-
 const Props = () => {
   return (
     <>
@@ -12,7 +7,7 @@ const Props = () => {
         <meshStandardMaterial color="gray" />
       </mesh>
 
-      {/* Trees: Render several trees along one side */}
+      {/* Trees */}
       {[-20, -10, 0, 10, 20].map((x, index) => (
         <group key={`tree-${index}`}>
           {/* Tree trunk */}
@@ -28,7 +23,7 @@ const Props = () => {
         </group>
       ))}
 
-      {/* Boxes: Place a few boxes at different positions */}
+      {/* Boxes*/}
       <mesh position={[8, 0.5, 5]}>
         <boxGeometry args={[1, 1, 1]} />
         <meshStandardMaterial color="tomato" />

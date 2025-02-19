@@ -1,5 +1,3 @@
-import React from "react";
-
 const Environment = () => {
   return (
     <>
@@ -8,7 +6,6 @@ const Environment = () => {
         <planeGeometry args={[100, 100]} />
         <meshStandardMaterial color="lightgreen" />
       </mesh>
-      {/* Add more low-poly elements here */}
     </>
   );
 };

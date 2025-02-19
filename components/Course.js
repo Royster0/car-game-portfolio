@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 
@@ -13,20 +13,17 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
     { position: new THREE.Vector3(20, 0.01, 25), type: "finish" },
   ];
 
-  // Track the current active checkpoint index.
+  // Track the current checkpoint
   const [currentIndex, setCurrentIndex] = useState(0);
-  // Local start time (set when the start checkpoint is hit).
   const [localStartTime, setLocalStartTime] = useState(null);
 
-  const collisionThreshold = 1.5;
+  const collisionThreshold = 1.7;
 
   useFrame(() => {
     if (!carRef.current) return;
     const carPos = carRef.current.position;
-    // Only process if we haven't completed the course.
     if (currentIndex < checkpoints.length) {
       const checkpoint = checkpoints[currentIndex];
-      // Check collision using a simple AABB approach.
       if (
         Math.abs(carPos.x - checkpoint.position.x) < collisionThreshold &&
         Math.abs(carPos.z - checkpoint.position.z) < collisionThreshold
@@ -37,13 +34,13 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
           setLocalStartTime(startTime);
           onStart(startTime);
         }
-        // If we're not at the final checkpoint, advance to the next one.
+        // If not at the final checkpoint, advance to the next one.
         if (checkpoint.type !== "finish") {
           setCurrentIndex(currentIndex + 1);
         } else {
-          // Final checkpoint reached; finish the course.
+          // Final checkpoint reached, finish the course.
           onFinish();
-          // Mark the course as finished by setting currentIndex to length.
+          // Set currentIndex to length.
           setCurrentIndex(checkpoints.length);
         }
       }
@@ -64,7 +61,7 @@ const Course = ({ carRef, onStart, onUpdate, onFinish }) => {
         let color = "blue";
         if (checkpoint.type === "start") color = "green";
         if (checkpoint.type === "finish") color = "red";
-        // Highlight the current checkpoint with a higher opacity.
+        // Highlight the current checkpoint
         const opacity = idx === currentIndex ? 0.7 : 0.3;
         return (
           <mesh

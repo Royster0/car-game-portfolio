@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import Car from "./Car";
 import Environment from "./Environment";
@@ -14,7 +14,7 @@ export default function GameScene() {
   const [courseFinished, setCourseFinished] = useState(false);
   const [courseElapsedTime, setCourseElapsedTime] = useState(0);
 
-  const handleCourseStart = (startTime) => {
+  const handleCourseStart = () => {
     setCourseStarted(true);
     setCourseFinished(false);
     setCourseElapsedTime(0);
@@ -49,9 +49,12 @@ export default function GameScene() {
       </Canvas>
       <ControlsOverlay />
       {courseStarted && (
-        <div className="absolute top-0 right-0 m-4 bg-white bg-opacity-80 p-2 rounded shadow">
-          <p className="text-lg font-semibold">
-            Timer: {courseElapsedTime.toFixed(2)} s{" "}
+        <div className="absolute top-3 right-3 bg-stone-600 text-white bg-opacity-80 p-3 rounded-md shadow">
+          <p>
+            Timer:{" "}
+            <span className="font-semibold">
+              {courseElapsedTime.toFixed(2)} s{" "}
+            </span>
             {courseFinished ? "(Finished)" : ""}
           </p>
         </div>

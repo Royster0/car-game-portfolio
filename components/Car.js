@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, forwardRef } from "react";
+import { useRef, useEffect, useState, forwardRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import gsap from "gsap";
 import { useRouter } from "next/router";
@@ -12,14 +12,14 @@ const Car = forwardRef((props, ref) => {
   const velocityRef = useRef(new THREE.Vector3(0, 0, 0));
   const collisionTriggered = useRef(false);
 
-  // Physics constants (acceleration, speed, etc.)
-  const ACCELERATION = 0.005;
-  const MAX_SPEED = 0.5;
-  const MAX_REVERSE_SPEED = 0.3;
-  const COAST_DECELERATION = 0.98;
-  const BRAKE_DECELERATION = 0.8;
-  const TURN_RATE = 0.03;
-  const DRIFT_LERP_TURNING = 0.02;
+  // Physics
+  const ACCELERATION = 15;
+  const MAX_SPEED = 20;
+  const MAX_REVERSE_SPEED = 3;
+  const COAST_DECELERATION = 0.99;
+  const BRAKE_DECELERATION = 0.95;
+  const TURN_RATE = 1.8;
+  const DRIFT_LERP_TURNING = 1;
   const DRIFT_LERP_STRAIGHT = 0.1;
 
   const signPositions = [
@@ -60,39 +60,45 @@ const Car = forwardRef((props, ref) => {
         y: 0,
         z: 0,
         duration: 1,
-        ease: "back.out(1.7)",
+        ease: "back.out(2)",
       });
     }
   }, [carRef]);
 
-  useFrame(() => {
-    if (!carRef.current) return;
+  useFrame((state, delta) => {
+    if (!carRef.current) {
+      return;
+    }
     const car = carRef.current;
     const forward = new THREE.Vector3(0, 0, -1);
     forward.applyAxisAngle(new THREE.Vector3(0, 1, 0), car.rotation.y);
 
     let isTurning = false;
     if (keys["a"]) {
-      car.rotation.y += TURN_RATE;
+      car.rotation.y += TURN_RATE * delta;
       isTurning = true;
     }
     if (keys["d"]) {
-      car.rotation.y -= TURN_RATE;
+      car.rotation.y -= TURN_RATE * delta;
       isTurning = true;
     }
 
     if (keys["w"]) {
-      velocityRef.current.add(forward.clone().multiplyScalar(ACCELERATION));
+      velocityRef.current.add(
+        forward.clone().multiplyScalar(ACCELERATION * delta)
+      );
       if (velocityRef.current.length() > MAX_SPEED) {
         velocityRef.current.setLength(MAX_SPEED);
       }
     } else if (keys["s"]) {
-      velocityRef.current.add(forward.clone().multiplyScalar(-ACCELERATION));
+      velocityRef.current.add(
+        forward.clone().multiplyScalar(-ACCELERATION * delta)
+      );
       if (velocityRef.current.length() > MAX_REVERSE_SPEED) {
         velocityRef.current.setLength(MAX_REVERSE_SPEED);
       }
     } else {
-      velocityRef.current.multiplyScalar(COAST_DECELERATION);
+      velocityRef.current.multiplyScalar(COAST_DECELERATION, delta * 60);
     }
 
     if (keys[" "]) {
@@ -105,8 +111,8 @@ const Car = forwardRef((props, ref) => {
     const driftLerpFactor = isTurning
       ? DRIFT_LERP_TURNING
       : DRIFT_LERP_STRAIGHT;
-    velocityRef.current.lerp(desiredVelocity, driftLerpFactor);
-    car.position.add(velocityRef.current);
+    velocityRef.current.lerp(desiredVelocity, driftLerpFactor * delta * 60);
+    car.position.add(velocityRef.current.clone().multiplyScalar(delta));
 
     // Collision detection for signs.
     if (!collisionTriggered.current) {

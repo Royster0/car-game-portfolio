@@ -1,59 +1,42 @@
 import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
 const CustomCursor = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isHoveringLink, setIsHoveringLink] = useState(false);
-  const [hideCursor, setHideCursor] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
 
+  // Update mouse
   useEffect(() => {
-    const onMouseMove = (e) => {
+    const updatePosition = (e) => {
       setPosition({ x: e.clientX, y: e.clientY });
-
-      // Check if the element under the mouse has the class "game-canvas"
-      const element = document.elementFromPoint(e.clientX, e.clientY);
-      if (element && element.closest(".game-canvas")) {
-        setHideCursor(true);
-      } else {
-        setHideCursor(false);
-      }
     };
-    const onMouseEnterLink = () => setIsHoveringLink(true);
-    const onMouseLeaveLink = () => setIsHoveringLink(false);
 
-    document.addEventListener("mousemove", onMouseMove);
-    const links = document.querySelectorAll("a");
-    links.forEach((link) => {
-      link.addEventListener("mouseenter", onMouseEnterLink);
-      link.addEventListener("mouseleave", onMouseLeaveLink);
-    });
-
-    return () => {
-      document.removeEventListener("mousemove", onMouseMove);
-      links.forEach((link) => {
-        link.removeEventListener("mouseenter", onMouseEnterLink);
-        link.removeEventListener("mouseleave", onMouseLeaveLink);
-      });
-    };
+    window.addEventListener("mousemove", updatePosition);
+    return () => window.removeEventListener("mousemove", updatePosition);
   }, []);
 
-  if (hideCursor) return null;
+  // TODO: Mouse hover
+  useEffect(() => {
+    const handleHover = () => {
+      const links = document.querySelectorAll("a", "button");
+      links.forEach((link) => {
+        link.addEventListener("mouseEnter", () => setIsHovering(true));
+        link.addEventListener("mouseleave", () => setIsHovering(false));
+      });
+    };
+  });
 
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: position.y,
-        left: position.x,
-        width: isHoveringLink ? 40 : 20,
-        height: isHoveringLink ? 40 : 20,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        borderRadius: "50%",
-        pointerEvents: "none",
-        transform: "translate(-50%, -50%)",
-        transition: "width 0.2s, height 0.2s, background-color 0.2s",
-        zIndex: 9999,
+    <motion.div
+      className="fixed top-0 left-0 w-8 h-8 pointer-events-none mix-blend-difference z-50"
+      animate={{
+        scale: isHovering ? 1.5 : 1,
+        x: position.x - 16,
+        y: position.y - 16,
       }}
-    />
+    >
+      <div className="w-full h-full bg-white rounded-full" />
+    </motion.div>
   );
 };
 
